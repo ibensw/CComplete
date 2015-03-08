@@ -9,8 +9,9 @@ This plugin was created after testing other plugins for sublime. The plugin is s
 ## What it does
 
 - Provide code completion in c and c++ files
-- Deduct members of structs/unions
+- Deduct members of structs/unions (if you're lucky)
 - Provide type information for word under cursor
+- Jump to definitions
 
 ## What it does not do
 
