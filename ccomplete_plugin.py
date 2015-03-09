@@ -1,5 +1,5 @@
 import sublime, sublime_plugin
-import os.path, re
+import os, re
 from CComplete.ccomplete import CComplete
 from CComplete.tokenizer import Tokenizer
 
@@ -14,7 +14,9 @@ class CCompletePlugin(sublime_plugin.EventListener):
             print("ERROR")
             return
         self.settings = sublime.load_settings("ccomplete")
-        self.cc = CComplete(self.settings.get('cache', 500))
+        cachepath = sublime.cache_path() + "/ccomplete_cache"
+        os.makedirs(cachepath, 0o777, True)
+        self.cc = CComplete(self.settings.get('cache', 500), cachepath)
         self.currentfile = None
         self.ready = False
         self.extensions = self.settings.get("extensions", ["c", "cpp", "cxx", "h", "hpp", "hxx"])
@@ -215,12 +217,13 @@ class CCompletePlugin(sublime_plugin.EventListener):
             self.show_number(view)
 
     def jump_token_definition(self, token, word = None):
-        offset = ""
+        offset = 0
         if word and token[Tokenizer.T_SEARCH].find(word) != -1:
-            offset = ":" + str(token[Tokenizer.T_SEARCH].find(word)+len(word)+1)
+            offset = token[Tokenizer.T_SEARCH].find(word)+len(word)+1
         flags = sublime.ENCODED_POSITION
         line = token[Tokenizer.T_LINE]
-        sublime.active_window().open_file(token[Tokenizer.T_FILENAME]+":"+str(line)+offset, flags)
+        file = token[Tokenizer.T_FILENAME]
+        sublime.active_window().open_file(file+":"+str(line)+":"+str(offset), flags)
 
 class ccomplete_jump_definition(sublime_plugin.TextCommand):
     def run(self, edit):
@@ -233,7 +236,6 @@ class ccomplete_jump_definition(sublime_plugin.TextCommand):
         word = view.substr(selword)
 
         token=CCP.get_sel_token(view)
-
         CCP.jump_token_definition(token, word)
 
 class ccomplete_show_symbols(sublime_plugin.TextCommand):
