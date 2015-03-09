@@ -38,6 +38,16 @@ class Tokenizer:
     def set_cache_size(self, newsize):
         self.cachesize = newsize
 
+    def files_valid(self, files):
+        for file in files:
+            if file in self.cacheentries:
+                date, _ = self.cache[file]
+                if os.path.getmtime(file) > date:
+                    return False
+            else:
+                return False
+        return True
+
     def clean_cache(self, keepSet = [], modOnly = False):
         linecache.checkcache()
         remove = set([])
@@ -46,7 +56,7 @@ class Tokenizer:
             date, _ = self.cache[file]
             if os.path.getmtime(file) > date or i>self.cachesize:
                 remove.add(file)
-                del self.cache[e]
+                del self.cache[file]
             elif not modOnly:
                 i+=1
         totrem = len(remove)

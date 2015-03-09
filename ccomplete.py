@@ -58,11 +58,6 @@ class CComplete:
                 token[Tokenizer.T_EXTRA]["completion"]=[token[Tokenizer.T_NAME]+"\t"+CComplete.pretty_type(token[Tokenizer.T_SEARCH]), token[Tokenizer.T_NAME]]
                 continue
 
-            if token[Tokenizer.T_KIND] == "l":
-                token[Tokenizer.T_EXTRA]["status"]="Local: " + CComplete.pretty_type(token[Tokenizer.T_SEARCH]) + " $#"
-                token[Tokenizer.T_EXTRA]["completion"]=[token[Tokenizer.T_NAME]+"\t"+CComplete.pretty_type(token[Tokenizer.T_SEARCH]), token[Tokenizer.T_NAME]]
-                continue
-
             if token[Tokenizer.T_KIND] == "d":
                 token[Tokenizer.T_EXTRA]["status"]="Macro: " + " ".join(token[Tokenizer.T_SEARCH][2:-2].strip().split())
                 token[Tokenizer.T_EXTRA]["completion"]=[token[Tokenizer.T_NAME]+"\t#define", token[Tokenizer.T_NAME]]
@@ -106,15 +101,30 @@ class CComplete:
                 token[Tokenizer.T_EXTRA]["completion"]=[token[Tokenizer.T_NAME]+"\tunion", token[Tokenizer.T_NAME]]
                 continue
 
-            if token[Tokenizer.T_KIND] == "a":
-                type=token[Tokenizer.T_EXTRA]["type"]
-                if token[Tokenizer.T_EXTRA]["pointer"]:
-                    type="*"+type
-                if "array" in token[Tokenizer.T_EXTRA]:
-                    type=type+token[Tokenizer.T_EXTRA]["array"]
-                token[Tokenizer.T_EXTRA]["status"]="Param: " + type + " $#"
-                token[Tokenizer.T_EXTRA]["completion"]=[token[Tokenizer.T_NAME]+"\t"+type, token[Tokenizer.T_NAME]]
-                continue
+    def prettify_func(self, functokens):
+        for funcname in functokens:
+            for token in functokens[funcname]:
+                if token[Tokenizer.T_KIND] == "l":
+                    token[Tokenizer.T_EXTRA]["status"]="Local: " + CComplete.pretty_type(token[Tokenizer.T_SEARCH]) + " $#"
+                    token[Tokenizer.T_EXTRA]["completion"]=[token[Tokenizer.T_NAME]+"\t"+CComplete.pretty_type(token[Tokenizer.T_SEARCH]), token[Tokenizer.T_NAME]]
+                    continue
+
+                if token[Tokenizer.T_KIND] == "a":
+                    type=token[Tokenizer.T_EXTRA]["type"]
+                    if token[Tokenizer.T_EXTRA]["pointer"]:
+                        type="*"+type
+                    if "array" in token[Tokenizer.T_EXTRA]:
+                        type=type+token[Tokenizer.T_EXTRA]["array"]
+                    token[Tokenizer.T_EXTRA]["status"]="Param: " + type + " $#"
+                    token[Tokenizer.T_EXTRA]["completion"]=[token[Tokenizer.T_NAME]+"\t"+type, token[Tokenizer.T_NAME]]
+                    continue
+
+    def is_valid(self, filename, basepaths = [], syspaths = [], extra_files=[]):
+        files = self.I.scan_recursive(filename, basepaths, syspaths)
+        for file in extra_files:
+            if file not in files:
+                files.append(file)
+        return self.T.files_valid(files)
 
     def load_file(self, filename, basepaths = [], syspaths = [], extra_files=[]):
         self.files = self.I.scan_recursive(filename, basepaths, syspaths)
@@ -129,10 +139,12 @@ class CComplete:
             tokens, functokens = self.T.scan_file(file)
             self.prettify(tokens)
             self.add_tokens(tokens)
-            self.functiontokens[filename] = functokens
+            self.functiontokens[file] = functokens
+            self.prettify_func(self.functiontokens[file])
+            print(file)
         self.sortedtokens = [x.lower() for x in self.tokens.keys()]
         self.sortedtokens.sort()
-        rem = self.T.clean_cache()
+        rem = self.T.clean_cache(set(self.files))
         print("Removed %d entries" % rem)
         print("Done loading, %d files" % len(self.files))
 
@@ -142,7 +154,7 @@ class CComplete:
         results=[]
         while pos < len(self.sortedtokens):
             if self.sortedtokens[pos].startswith(prefix):
-                results.append(self.tags[self.taglist[pos]])
+                results.append(self.tokens[self.sortedtokens[pos]])
             else:
                 break
             pos+=1
