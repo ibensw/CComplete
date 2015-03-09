@@ -141,7 +141,6 @@ class CComplete:
             self.add_tokens(tokens)
             self.functiontokens[file] = functokens
             self.prettify_func(self.functiontokens[file])
-            print(file)
         self.sortedtokens = [x.lower() for x in self.tokens.keys()]
         self.sortedtokens.sort()
         rem = self.T.clean_cache(set(self.files))

@@ -128,6 +128,8 @@ class Tokenizer:
 
     @staticmethod
     def parse_signature(parsed, filename):
+        if not "signature" in parsed[Tokenizer.T_EXTRA]:
+            return ("??", None)
         signature=parsed[Tokenizer.T_EXTRA]["signature"][1:-1]
         args=signature.split(",")
         ftags=[]

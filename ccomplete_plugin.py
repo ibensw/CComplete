@@ -213,3 +213,50 @@ class CCompletePlugin(sublime_plugin.EventListener):
             view.set_status("ctcomplete", token[Tokenizer.T_EXTRA]["status"].replace("$#", word))
         else:
             self.show_number(view)
+
+    def jump_token_definition(self, token, word = None):
+        offset = ""
+        if word and token[Tokenizer.T_SEARCH].find(word) != -1:
+            offset = ":" + str(token[Tokenizer.T_SEARCH].find(word)+len(word)+1)
+        flags = sublime.ENCODED_POSITION
+        line = token[Tokenizer.T_LINE]
+        sublime.active_window().open_file(token[Tokenizer.T_FILENAME]+":"+str(line)+offset, flags)
+
+class ccomplete_jump_definition(sublime_plugin.TextCommand):
+    def run(self, edit):
+        global CCP
+        if not CCP.ready:
+            return
+        view = sublime.active_window().active_view()
+
+        selword = view.word(view.sel()[0].end())
+        word = view.substr(selword)
+
+        token=CCP.get_sel_token(view)
+
+        CCP.jump_token_definition(token, word)
+
+class ccomplete_show_symbols(sublime_plugin.TextCommand):
+    def run(self, edit):
+        global CCP
+        if not CCP.ready:
+            return
+        global active_ctags_listener
+        view = sublime.active_window().active_view()
+
+        filename = CCP.currentfile
+        func = CCP.current_function(view)
+
+        tokens = []
+        if func in CCP.cc.functiontokens[filename]:
+            tokens.extend(CCP.cc.functiontokens[filename][func])
+        tokens.extend(CCP.cc.tokens.values())
+
+        def on_done(i):
+            if i == -1:
+                return
+            token = tokens[i]
+            CCP.jump_token_definition(token, token[Tokenizer.T_NAME])
+
+        tokenlist = [[x[Tokenizer.T_NAME], x[Tokenizer.T_FILENAME] + ":" + str(x[Tokenizer.T_LINE])] for x in tokens]
+        sublime.active_window().show_quick_panel(tokenlist, on_done, 0, 0)
