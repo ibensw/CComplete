@@ -93,7 +93,7 @@ class Tokenizer:
             name=parsed[Tokenizer.T_NAME]
             if parsed[Tokenizer.T_KIND] == Tokenizer.K_MEMBER and name.find("::") == -1:
                 continue
-            if parsed[Tokenizer.T_KIND] == Tokenizer.K_MACRO and name.find("#define") == -1:
+            if parsed[Tokenizer.T_KIND] == Tokenizer.K_MACRO and parsed[Tokenizer.T_SEARCH].find("#define") == -1:
                 continue
             if parsed[Tokenizer.T_KIND] == Tokenizer.K_LOCAL:
                 if not lastfuncid in functiontags:
