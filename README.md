@@ -9,9 +9,10 @@ This plugin was created after testing other plugins for sublime. The plugin is s
 ## What it does
 
 - Provide code completion in c and c++ files
-- Deduct members of structs/unions (if you're lucky)
+- Deduct members of structs/unions
 - Provide type information for word under cursor
 - Jump to definitions
+- The plugin caches information in memory and on disk to speedup information lookups
 
 ## What it does not do
 
@@ -24,12 +25,11 @@ This plugin requires ctags to be installed on the system, however no tag files m
 
 ## Todo / Future work
 - Improve ctags flags, it might be doing more than what is required by the plugin
-- Filter results when multiple results are found
-- Better include path deduction, at this point all includes are searched from the project folders, relative includes from the parsed files are not yet found
+- Improve the filter that handles symbol collision
 - Settings, provide settings to optimize this plugin or to customize the behavior
-- Run ctags for all files seperately and cache the output when files do not change
+- Add menuitems to access the settings/commands
 
 ## Contributing
-- Since I don't have much time I don't have I don't have an issues page
 - If you have an issue or a great idea, feel free to fork and create a pull request
 - No special coding rules, just make it readable and test it a bit
+- Issues will be handled at a best effort basis
