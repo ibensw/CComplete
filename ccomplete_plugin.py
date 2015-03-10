@@ -13,6 +13,11 @@ class CCompletePlugin(sublime_plugin.EventListener):
         else:
             print("ERROR")
             return
+        self.ready = False
+        self.init = False
+
+    def plugin_loaded(self):
+        print("Plugin loaded!")
         self.settings = sublime.load_settings("ccomplete")
         cachepath = sublime.cache_path() + "/ccomplete_cache"
         os.makedirs(cachepath, 0o777, True)
@@ -21,8 +26,11 @@ class CCompletePlugin(sublime_plugin.EventListener):
         self.ready = False
         self.extensions = self.settings.get("extensions", ["c", "cpp", "cxx", "h", "hpp", "hxx"])
         self.load_matching = self.settings.get("load_matching", True)
+        self.init = True
 
     def load(self, view):
+        if self.init == False:
+            self.plugin_loaded()
         filename = view.file_name()
         view.erase_status("ctcomplete")
         self.ready = False
@@ -143,6 +151,8 @@ class CCompletePlugin(sublime_plugin.EventListener):
         return goodmembers
 
     def get_sel_token(self, view):
+        if len(view.sel()) < 1:
+            return None
         selword = view.word(view.sel()[0].end())
         i = selword.begin()
         word = view.substr(selword)

@@ -2,7 +2,7 @@ from subprocess import PIPE, Popen
 import os.path
 import copy
 import re
-import pickle
+import marshal
 import linecache
 
 class Tokenizer:
@@ -82,7 +82,7 @@ class Tokenizer:
 
         if os.path.isfile(hashfn) and os.path.getmtime(hashfn) > os.path.getmtime(filename):
             with open(hashfn, 'rb') as f:
-                values = pickle.load(f)
+                values = marshal.load(f)
             self.cacheentries.insert(0, filename)
             self.cache[filename] = (time, values)
             return values
@@ -126,7 +126,7 @@ class Tokenizer:
         self.cacheentries.insert(0, filename)
         self.cache[filename] = (time, (tags, functiontags))
         with open(hashfn, 'wb') as f:
-            pickle.dump((tags, functiontags), f, pickle.HIGHEST_PROTOCOL)
+            marshal.dump((tags, functiontags), f)
         return (tags, functiontags)
 
     @staticmethod
@@ -159,7 +159,9 @@ class Tokenizer:
                 extra["pointer"] = var[2]
                 if var[3]:
                     extra["array"] = var[3]
-                ftags.append((var[0], filename, parsed[Tokenizer.T_SEARCH], parsed[Tokenizer.T_LINE], Tokenizer.K_PARAM, extra))
+                p = (var[0], filename, parsed[Tokenizer.T_SEARCH], parsed[Tokenizer.T_LINE], Tokenizer.K_PARAM, extra)
+                Tokenizer.prettify(p)
+                ftags.append(p)
                 s=var[0]
                 if var[2]:
                     s="*"+s
@@ -224,9 +226,6 @@ class Tokenizer:
 
     @staticmethod
     def prettify(token):
-        if "status" in token[Tokenizer.T_EXTRA]:
-            return
-
         if token[Tokenizer.T_KIND] == "f":
             token[Tokenizer.T_EXTRA]["status"]="Func: $#" + token[Tokenizer.T_EXTRA]["signature"]
             token[Tokenizer.T_EXTRA]["completion"]=[token[Tokenizer.T_NAME]+"\t()", token[Tokenizer.T_NAME]+token[Tokenizer.T_EXTRA]["shortsignature"]]
