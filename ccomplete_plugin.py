@@ -117,7 +117,6 @@ class CCompletePlugin(sublime_plugin.EventListener):
         line=view.substr(line)
         line = re.split(',|;|\(|\s+', line.strip())[-1].strip()
         chain = [x.split("[", 1)[0] for x in re.split('->|\.|::', line.strip())]
-        print(chain)
         func = self.current_function(view)
         if not filename in self.cc.functiontokens or not func in self.cc.functiontokens[filename]:
             print("Not in a filled function (%s, %s)" % (filename, func))
@@ -139,13 +138,9 @@ class CCompletePlugin(sublime_plugin.EventListener):
         pchain = chain[1:]
         if not full:
             pchain = pchain[0:-1]
-        print("type: %s", type)
-        print(pchain)
         for newtype in pchain:
             type = type + "::" + newtype
-            print("atype: %s", type)
             type = self.get_base_type(type)
-            print("btype: %s", type)
         members = self.cc.search_tokens(type + "::")
         goodmembers = [x for x in members if x[Tokenizer.T_NAME][len(type)+2:].find("::") == -1]
         return goodmembers

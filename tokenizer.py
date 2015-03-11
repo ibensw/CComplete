@@ -73,9 +73,10 @@ class Tokenizer:
     def scan_file(self, filename):
         if filename in self.cacheentries:
             self.cacheentries.remove(filename)
-            self.cacheentries.insert(0, filename)
-            _, values = self.cache[filename]
-            return values
+            if filename in self.cache:
+                self.cacheentries.insert(0, filename)
+                _, values = self.cache[filename]
+                return values
 
         hashfn = self.cachepath + "/" + str(hash(filename))
         time = os.path.getmtime(filename)
