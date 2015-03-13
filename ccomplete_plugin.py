@@ -20,7 +20,8 @@ class CCompletePlugin(sublime_plugin.EventListener):
         print("Plugin loaded!")
         self.settings = sublime.load_settings("ccomplete")
         cachepath = sublime.cache_path() + "/ccomplete_cache"
-        os.makedirs(cachepath, 0o777, True)
+        if not os.path.exists(cachepath):
+            os.mkdirs(cachepath)
         self.cc = CComplete(self.settings.get('cache', 500), cachepath)
         self.currentfile = None
         self.ready = False
@@ -115,8 +116,15 @@ class CCompletePlugin(sublime_plugin.EventListener):
         line = view.line(pos)
         line.b=pos
         line=view.substr(line)
-        line = re.split(',|;|\(|\s+', line.strip())[-1].strip()
+        oldline=""
+        while oldline != line:
+            oldline = line
+            line = re.sub(r'\[[^\[]*\]', '', line)
+            print(line)
+        line = re.split(',|;|\(|\[|\s+', line.strip())[-1].strip()
+        print(line)
         chain = [x.split("[", 1)[0] for x in re.split('->|\.|::', line.strip())]
+        print(chain)
         func = self.current_function(view)
         if not filename in self.cc.functiontokens or not func in self.cc.functiontokens[filename]:
             print("Not in a filled function (%s, %s)" % (filename, func))
