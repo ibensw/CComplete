@@ -200,6 +200,19 @@ class Tokenizer:
                     exdict["array"] = var[3]
         if search[0:2] == "/^" and search[-2:] == "$/":
             search = search[2:-2]
+        elif search[0:2] == "/^" and search[-2:] == "(/":
+            start=len(search)-3
+            search = linecache.getline(filename, linenum)
+            end=search.find(")", start)
+            if end>0:
+                sign=search[start:end]
+                args = sign.split(",")
+                newargs = []
+                i=1
+                for arg in args:
+                    newargs.append("${" + str(i) + ":" + arg.strip() + "}")
+                    i+=1
+                exdict["shortsignature"] = "(" + ", ".join(newargs) + ")"
         else:
             search = linecache.getline(filename, linenum)
         return (token, filename, search, linenum, type, exdict)
@@ -249,7 +262,10 @@ class Tokenizer:
 
         if token[Tokenizer.T_KIND] == "d":
             token[Tokenizer.T_EXTRA]["status"]="Macro: " + " ".join(token[Tokenizer.T_SEARCH].strip().split())
-            token[Tokenizer.T_EXTRA]["completion"]=[token[Tokenizer.T_NAME]+"\t#define", token[Tokenizer.T_NAME]]
+            if "shortsignature" in token[Tokenizer.T_EXTRA]:
+                token[Tokenizer.T_EXTRA]["completion"]=[token[Tokenizer.T_NAME]+"\t#define", token[Tokenizer.T_NAME] + token[Tokenizer.T_EXTRA]["shortsignature"]]
+            else:
+                token[Tokenizer.T_EXTRA]["completion"]=[token[Tokenizer.T_NAME]+"\t#define", token[Tokenizer.T_NAME]]
             return
 
         if token[Tokenizer.T_KIND] == "e":
