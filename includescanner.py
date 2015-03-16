@@ -1,8 +1,12 @@
 import os.path, re
+from CComplete.filecache import FileCache
 
-class IncludeScanner:
+class IncludeScanner(FileCache):
     baseregex = re.compile('^#include\s+"(.*)"')
     sysregex = re.compile('^#include\s+<(.*)>')
+
+    def __init__(self):
+        FileCache.__init__(self)
 
     @staticmethod
     def find_file(basepaths, filename):
@@ -14,8 +18,10 @@ class IncludeScanner:
                 return filepath
         return None
 
-    @staticmethod
-    def scan_file(filename, basepaths = [], syspaths = []):
+    def scan_file(self, filename, basepaths = [], syspaths = []):
+        cache = self.get(filename)
+        if cache:
+            return cache
         if filename and os.path.isfile(filename):
             findsys = len(syspaths) > 0
 
@@ -39,19 +45,21 @@ class IncludeScanner:
                                 fullpath = IncludeScanner.find_file(syspaths, sysinc.group(1))
                                 if fullpath:
                                     includes.add(fullpath)
+            self.set(filename, includes)
             return includes
         else:
             return set([])
 
-    @staticmethod
-    def scan_recursive(filename, basepaths = [], syspaths = []):
+    def scan_recursive(self, filename, basepaths = [], syspaths = []):
+        self.clean_cache()
+        self.clear_cache(2000)
         todo=[filename]
         done=[]
 
         while len(todo) > 0:
             progress = todo.pop(0)
             done.append(progress)
-            includes = IncludeScanner.scan_file(progress, basepaths, syspaths)
+            includes = self.scan_file(progress, basepaths, syspaths)
             for i in includes:
                 if i not in todo and i not in done:
                     todo.append(i)

@@ -15,6 +15,7 @@ class CCompletePlugin(sublime_plugin.EventListener):
             return
         self.ready = False
         self.init = False
+        self.prevword = None
 
     def plugin_loaded(self):
         print("Plugin loaded!")
@@ -159,7 +160,7 @@ class CCompletePlugin(sublime_plugin.EventListener):
 
     def get_sel_token(self, view):
         if len(view.sel()) < 1:
-            return None
+            return (None, None)
         selword = view.word(view.sel()[0].end())
         i = selword.begin()
         word = view.substr(selword)
@@ -167,18 +168,18 @@ class CCompletePlugin(sublime_plugin.EventListener):
             members = self.traverse_members(view, selword.end())
             for m in members:
                 if m[Tokenizer.T_NAME].endswith("::" + word):
-                    return m
-            return None
+                    return (word, m)
+            return (word, None)
 
         func =  self.current_function(view)
         filename = self.currentfile
         if filename in self.cc.functiontokens and func in self.cc.functiontokens[filename] and self.cc.functiontokens[filename][func]:
             tokens = [x for x in self.cc.functiontokens[filename][func] if x[Tokenizer.T_NAME] == word]
             if len(tokens) > 0:
-                return Tokenizer.best_match(tokens)
+                return (word, Tokenizer.best_match(tokens))
         if word.lower() in self.cc.tokens:
-            return self.cc.tokens[word.lower()]
-        return None
+            return (word, self.cc.tokens[word.lower()])
+        return (word, None)
 
     def on_activated_async(self, view):
         self.load(view)
@@ -206,9 +207,7 @@ class CCompletePlugin(sublime_plugin.EventListener):
 
         return (completions, sublime.INHIBIT_WORD_COMPLETIONS)
 
-    def show_number(self, view):
-        selword = view.word(view.sel()[0].end())
-        word = view.substr(selword)
+    def show_number(self, view, word):
         num=None
         try:
             if word[0:2] == "0x":
@@ -224,14 +223,25 @@ class CCompletePlugin(sublime_plugin.EventListener):
     def on_selection_modified_async(self, view):
         if not self.ready:
             return
+        block = sublime.active_window().active_view().scope_name(sublime.active_window().active_view().sel()[0].begin()).split()[-1].split(".")[0]
+        if block == "comment" or block == "string":
+            return
 
-        token = self.get_sel_token(view)
+        selword = view.word(view.sel()[0].end())
+        if selword == self.prevword:
+            return
+        else:
+            self.prevword = selword
+
+        word, token = self.get_sel_token(view)
         if token:
             selword = view.word(view.sel()[0].end())
             word = view.substr(selword)
             view.set_status("ctcomplete", token[Tokenizer.T_EXTRA]["status"].replace("$#", word))
+        elif len(word.strip()):
+            self.show_number(view, word.strip())
         else:
-            self.show_number(view)
+            view.erase_status("ctcomplete")
 
     def jump_token_definition(self, token, word = None):
         offset = 0
@@ -252,7 +262,7 @@ class ccomplete_jump_definition(sublime_plugin.TextCommand):
         selword = view.word(view.sel()[0].end())
         word = view.substr(selword)
 
-        token=CCP.get_sel_token(view)
+        _, token=CCP.get_sel_token(view)
         CCP.jump_token_definition(token, word)
 
 class ccomplete_show_symbols(sublime_plugin.TextCommand):

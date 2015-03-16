@@ -1,6 +1,6 @@
 from CComplete.tokenizer import Tokenizer
 from CComplete.includescanner import IncludeScanner
-import re, bisect
+import re, bisect, time
 
 class CComplete:
     def __init__(self, cachesize = 500, cachepath = "/tmp"):
@@ -27,7 +27,10 @@ class CComplete:
         return self.T.files_valid(files)
 
     def load_file(self, filename, basepaths = [], syspaths = [], extra_files=[], progress = None):
+        t=time.clock()
         self.files = self.I.scan_recursive(filename, basepaths, syspaths)
+        t=time.clock()-t
+        print("Scanning for includes took: %fs" % t)
         for file in extra_files:
             if file not in self.files:
                 self.files.append(file)
@@ -37,6 +40,7 @@ class CComplete:
         self.sortedtokens = []
         total = len(self.files)
         i=1
+        t=time.clock()-t
         for file in self.files:
             if progress:
                 progress(i, total)
@@ -44,6 +48,8 @@ class CComplete:
             tokens, functokens = self.T.scan_file(file)
             self.add_tokens(tokens)
             self.functiontokens[file] = functokens
+        t=time.clock()-t
+        print("Scanning for tokens took: %fs" % t)
         self.sortedtokens = [x.lower() for x in self.tokens.keys()]
         self.sortedtokens.sort()
         rem = self.T.clean_cache(set(self.files))
