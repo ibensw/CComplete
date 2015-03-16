@@ -21,7 +21,7 @@ class CCompletePlugin(sublime_plugin.EventListener):
         self.settings = sublime.load_settings("ccomplete")
         cachepath = sublime.cache_path() + "/ccomplete_cache"
         if not os.path.exists(cachepath):
-            os.mkdirs(cachepath)
+            os.mkdir(cachepath)
         self.cc = CComplete(self.settings.get('cache', 500), cachepath)
         self.currentfile = None
         self.ready = False
@@ -168,7 +168,7 @@ class CCompletePlugin(sublime_plugin.EventListener):
 
         func =  self.current_function(view)
         filename = self.currentfile
-        if filename in self.cc.functiontokens and func in self.cc.functiontokens[filename]:
+        if filename in self.cc.functiontokens and func in self.cc.functiontokens[filename] and self.cc.functiontokens[filename][func]:
             tokens = [x for x in self.cc.functiontokens[filename][func] if x[Tokenizer.T_NAME] == word]
             if len(tokens) > 0:
                 return Tokenizer.best_match(tokens)

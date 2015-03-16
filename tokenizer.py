@@ -22,7 +22,7 @@ class Tokenizer:
     K_MEMBER = "m"
     # todo: complete list...
 
-    declre = re.compile('(const\s)*(\w+)\s*([\s\*]?)\s*(\w+)(\[.*\])?')
+    declre = re.compile('(const\s)*(\w+)\s*([\s\*])\s*(\w+)(\[.*\])?')
 
     def __init__(self, cachepath = "/tmp", cachesize = 500):
         self.cachesize = cachesize
@@ -145,7 +145,8 @@ class Tokenizer:
     @staticmethod
     def parse_signature(parsed, filename):
         if not "signature" in parsed[Tokenizer.T_EXTRA]:
-            return ("??", None)
+            parsed[Tokenizer.T_EXTRA]["signature"] = "()"
+            return ("()", [])
         signature=parsed[Tokenizer.T_EXTRA]["signature"][1:-1]
         args=signature.split(",")
         ftags=[]
@@ -213,6 +214,7 @@ class Tokenizer:
     @staticmethod
     def pretty_type(line):
         if line[0:2] == "/^" and line[-2:] == "$/":
+            print("OBSOLETE")
             line = line[2:-2]
         type = Tokenizer.parsevariable(line)
         if not type:
