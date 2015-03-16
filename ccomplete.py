@@ -26,7 +26,7 @@ class CComplete:
                 files.append(file)
         return self.T.files_valid(files)
 
-    def load_file(self, filename, basepaths = [], syspaths = [], extra_files=[]):
+    def load_file(self, filename, basepaths = [], syspaths = [], extra_files=[], progress = None):
         self.files = self.I.scan_recursive(filename, basepaths, syspaths)
         for file in extra_files:
             if file not in self.files:
@@ -35,7 +35,12 @@ class CComplete:
         self.tokens = {}
         self.functiontokens = {}
         self.sortedtokens = []
+        total = len(self.files)
+        i=1
         for file in self.files:
+            if progress:
+                progress(i, total)
+                i+=1
             tokens, functokens = self.T.scan_file(file)
             self.add_tokens(tokens)
             self.functiontokens[file] = functokens

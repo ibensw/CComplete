@@ -29,6 +29,10 @@ class CCompletePlugin(sublime_plugin.EventListener):
         self.load_matching = self.settings.get("load_matching", True)
         self.init = True
 
+    @staticmethod
+    def showprogress(view, i, total):
+        view.set_status("ctcomplete", "Loading completions (%d/%d)..." % (i, total))
+
     def load(self, view):
         if self.init == False:
             self.plugin_loaded()
@@ -62,7 +66,7 @@ class CCompletePlugin(sublime_plugin.EventListener):
             return
         print("Loading")
         view.set_status("ctcomplete", "Loading completions...")
-        self.cc.load_file(filename, basepaths, syspaths, extra)
+        self.cc.load_file(filename, basepaths, syspaths, extra, lambda a, b: CCompletePlugin.showprogress(view, a, b))
         view.erase_status("ctcomplete")
         self.currentfile = filename
         self.ready = True
