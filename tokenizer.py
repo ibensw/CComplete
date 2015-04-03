@@ -96,7 +96,7 @@ class Tokenizer:
         lastfuncid=""
         p = Popen(attribs, stdout=PIPE)
         while True:
-            line = p.stdout.readline().decode('utf-8')
+            line = p.stdout.readline().decode('utf-8', errors='ignore')
             if not line:
                 break
             if line[0] == "!":
