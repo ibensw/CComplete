@@ -80,6 +80,10 @@ class CCompletePlugin(sublime_plugin.EventListener):
         folders = []
         projectfolder = os.path.dirname(sublime.active_window().project_file_name())
         data = sublime.active_window().project_data()
+        print(data)
+        if "folders" not in data:
+            print("No folder in projectdata")
+            return (folders, [])
         for folder in data["folders"]:
             path = os.path.join(projectfolder, folder["path"])
             folders.append(path)

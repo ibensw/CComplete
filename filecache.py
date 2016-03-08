@@ -17,8 +17,11 @@ class FileCache:
         if filename in self.cache:
             time, values = self.cache[filename]
             if time >= latest:
-                self.used.remove(filename)
-                self.used.insert(0, filename)
+                try:
+                    self.used.remove(filename)
+                    self.used.insert(0, filename)
+                except:
+                    pass
                 return values
         if self.filecache:
             hashfn = os.path.join(self.cachepath, str(hash(filename))+self.filesuffix)
@@ -54,4 +57,5 @@ class FileCache:
         removes = self.used[limit:]
         self.used=self.used[:limit]
         for i in removes:
-            del self.cache[i]
+            if i in self.cache:
+                del self.cache[i]

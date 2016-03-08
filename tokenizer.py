@@ -56,7 +56,7 @@ class Tokenizer:
         i=0
         for file in self.cacheentries:
             date, _ = self.cache[file]
-            if os.path.getmtime(file) > date or i>self.cachesize:
+            if (not os.path.exists(file)) or os.path.getmtime(file) > date or i>self.cachesize:
                 remove.add(file)
                 del self.cache[file]
             elif not modOnly:
