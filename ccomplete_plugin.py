@@ -130,7 +130,7 @@ class CCompletePlugin(sublime_plugin.EventListener):
             oldline = line
             line = re.sub(r'\[[^\[]*\]', '', line)
             print(line)
-        line = re.split(',|;|\(|\[|\s+', line.strip())[-1].strip()
+        line = re.split(',|;|\+|\(|\[|\s+', line.strip())[-1].strip()
         print(line)
         chain = [x.split("[", 1)[0] for x in re.split('->|\.|::', line.strip())]
         print(chain)
@@ -147,8 +147,13 @@ class CCompletePlugin(sublime_plugin.EventListener):
             if not token or token[Tokenizer.T_KIND] != Tokenizer.K_VARIABLE:
                 return []
         type=""
+        print(token)
         if token[Tokenizer.T_KIND] == Tokenizer.K_PARAM:
             type = token[Tokenizer.T_EXTRA]["type"]
+        elif 'typeref' in token[Tokenizer.T_EXTRA]:
+            type = token[Tokenizer.T_EXTRA]['typeref']
+            if type[0:7] == "struct:":
+                type=type[7:]
         else:
             type = Tokenizer.parsevariable(token[Tokenizer.T_SEARCH])[1]
         type = self.get_base_type(type)
