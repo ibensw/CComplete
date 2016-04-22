@@ -130,7 +130,7 @@ class CCompletePlugin(sublime_plugin.EventListener):
             oldline = line
             line = re.sub(r'\[[^\[]*\]', '', line)
             print(line)
-        line = re.split(',|;|!|\+|\(|\[|\s+', line.strip())[-1].strip()
+        line = re.split(',|&|;|!|\+|\(|\[|\s+', line.strip())[-1].strip()
         print(line)
         chain = [x.split("[", 1)[0] for x in re.split('->|\.|::', line.strip())]
         print(chain)
