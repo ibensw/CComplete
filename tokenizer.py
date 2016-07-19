@@ -19,6 +19,7 @@ class Tokenizer:
     K_PARAM = "a"
     K_VARIABLE = "v"
     K_MACRO = "d"
+    K_STRUCT = "s"
     K_MEMBER = "m"
     # todo: complete list...
 
@@ -102,6 +103,9 @@ class Tokenizer:
             if line[0] == "!":
                 continue
             parsed=Tokenizer.parse_line(line, filename)
+            if not parsed:
+                continue
+            print(parsed)
             name=parsed[Tokenizer.T_NAME]
             if parsed[Tokenizer.T_KIND] == Tokenizer.K_MEMBER and name.find("::") == -1:
                 continue
@@ -191,6 +195,9 @@ class Tokenizer:
                 linenum = int(value)
             else:
                 exdict[name] = value
+        if type == Tokenizer.K_STRUCT:
+            if 'struct' in exdict:
+                return None
         if type == Tokenizer.K_MEMBER:
             while token.find("::__anon") != -1:
                 start=token.find("::__anon")
