@@ -103,10 +103,9 @@ class Tokenizer:
             if line[0] == "!":
                 continue
             parsed=Tokenizer.parse_line(line, filename)
-            if not parsed:
-                continue
-            print(parsed)
             name=parsed[Tokenizer.T_NAME]
+            if parsed[Tokenizer.T_KIND] == Tokenizer.K_STRUCT and 'struct' in parsed[Tokenizer.T_EXTRA]:
+                continue
             if parsed[Tokenizer.T_KIND] == Tokenizer.K_MEMBER and name.find("::") == -1:
                 continue
             if parsed[Tokenizer.T_KIND] == Tokenizer.K_MACRO and parsed[Tokenizer.T_SEARCH].find("#define") == -1:
@@ -195,9 +194,6 @@ class Tokenizer:
                 linenum = int(value)
             else:
                 exdict[name] = value
-        if type == Tokenizer.K_STRUCT:
-            if 'struct' in exdict:
-                return None
         if type == Tokenizer.K_MEMBER:
             while token.find("::__anon") != -1:
                 start=token.find("::__anon")
