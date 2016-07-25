@@ -194,14 +194,6 @@ class Tokenizer:
                 linenum = int(value)
             else:
                 exdict[name] = value
-        if type == Tokenizer.K_MEMBER:
-            while token.find("::__anon") != -1:
-                start=token.find("::__anon")
-                end=token.find("::", start+8)
-                if end != -1:
-                    token = token[0:start]+token[end:]
-                else:
-                    token = token[0:start]
         if type == Tokenizer.K_LOCAL or type == Tokenizer.K_VARIABLE:
             var = Tokenizer.parsevariable(search)
             if var:

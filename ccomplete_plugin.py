@@ -120,6 +120,34 @@ class CCompletePlugin(sublime_plugin.EventListener):
                     return self.get_base_type(ref)
         return type
 
+    def filter_members(self, members, base):
+        goodmembers = []
+        typerefs = set()
+        for i,x in enumerate(members):
+            if 'typeref' in x[Tokenizer.T_EXTRA]:
+                typeref = x[Tokenizer.T_EXTRA]['typeref']
+                struct_base = ''
+                tag = ''
+                rest = ''
+                if typeref.find('::') > 0:
+                    struct_base, tag = typeref.split('::',1)
+                if tag.find('::') > 0:
+                    tag, rest = tag.split('::',1)
+                if struct_base == 'struct:'+base:
+                    typerefs.add(tag)
+        for i,x in enumerate(members):
+            member_base = x[Tokenizer.T_NAME][:len(base)]
+            member_rest = x[Tokenizer.T_NAME][len(base)+2:]
+            if member_base == base:
+                if member_rest.find('::') == -1:
+                    goodmembers.append(x)
+                else:
+                    tag,rest = member_rest.split('::',1)
+                    if rest.find('::') == -1:
+                        if tag[:6] == '__anon' and tag not in typerefs:
+                            goodmembers.append(x)
+        return goodmembers
+
     def traverse_members(self, view, pos, full = False):
         filename = self.currentfile
         line = view.line(pos)
@@ -164,7 +192,7 @@ class CCompletePlugin(sublime_plugin.EventListener):
             type = type + "::" + newtype
             type = self.get_base_type(type)
         members = self.cc.search_tokens(type + "::")
-        goodmembers = [x for x in members if x[Tokenizer.T_NAME][len(type)+2:].find("::") == -1]
+        goodmembers = self.filter_members(members,type)
         return goodmembers
 
     def get_sel_token(self, view):
