@@ -23,7 +23,7 @@ class Tokenizer:
     K_MEMBER = "m"
     # todo: complete list...
 
-    declre = re.compile('(const\s)*(\w+)\s*([\s\*])\s*(\w+)(\[.*\])?')
+    declre = re.compile('(const\s)*(struct\s)*(\w+)\s*([\s\*])\s*(\w+)(\[.*\])?')
 
     def __init__(self, cachepath = "/tmp", cachesize = 500):
         self.cachesize = cachesize
@@ -225,7 +225,7 @@ class Tokenizer:
         decl=decl.strip()
         r = Tokenizer.declre.match(decl)
         if r:
-            return (r.group(4), r.group(2), r.group(3) == "*", r.group(5))
+            return (r.group(5), r.group(3), r.group(3) == "*", r.group(6))
 
     @staticmethod
     def pretty_type(line):
