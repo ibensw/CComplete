@@ -118,6 +118,18 @@ class CCompletePlugin(sublime_plugin.EventListener):
                 else:
                     ref = CCompletePlugin.get_type(token[Tokenizer.T_SEARCH])
                     return self.get_base_type(ref)
+        else:
+            pos = type.rfind('::')
+            if pos > 0:
+                start = type[:pos]
+                end = type[pos+2:] + '$'
+                res = [self.cc.tokens[k] for k in self.cc.tokens if re.match(start, k) and re.search(end, k)]
+                for key,value in self.cc.tokens.items():
+                    if value[Tokenizer.T_KIND] == 'm' and 'typeref' in value[Tokenizer.T_EXTRA]:
+                        typeref = value[Tokenizer.T_EXTRA]['typeref']
+                        res = [x for x in res if not re.match(typeref, 'struct:'+x[Tokenizer.T_NAME].lower())]
+                if len(res) > 0:
+                    return res[0][Tokenizer.T_EXTRA]['typeref'][7:]
         return type
 
     def filter_members(self, members, base):
@@ -125,26 +137,27 @@ class CCompletePlugin(sublime_plugin.EventListener):
         typerefs = set()
         for i,x in enumerate(members):
             if 'typeref' in x[Tokenizer.T_EXTRA]:
-                typeref = x[Tokenizer.T_EXTRA]['typeref']
-                struct_base = ''
-                tag = ''
-                rest = ''
-                if typeref.find('::') > 0:
-                    struct_base, tag = typeref.split('::',1)
-                if tag.find('::') > 0:
-                    tag, rest = tag.split('::',1)
-                if struct_base == 'struct:'+base:
-                    typerefs.add(tag)
+                s = len('struct:'+base)
+                typeref_base = x[Tokenizer.T_EXTRA]['typeref'][:s]
+                typeref_tags = x[Tokenizer.T_EXTRA]['typeref'][s+2:]
+                if typeref_base == 'struct:'+base:
+                    typerefs.add(typeref_tags)
         for i,x in enumerate(members):
+            last_match = x[Tokenizer.T_NAME].rfind('::')
             member_base = x[Tokenizer.T_NAME][:len(base)]
-            member_rest = x[Tokenizer.T_NAME][len(base)+2:]
+            member_tags = x[Tokenizer.T_NAME][len(base)+2:last_match]
+            member_name = x[Tokenizer.T_NAME][last_match+2:]
             if member_base == base:
-                if member_rest.find('::') == -1:
+                if member_tags == '':
                     goodmembers.append(x)
                 else:
-                    tag,rest = member_rest.split('::',1)
-                    if rest.find('::') == -1:
-                        if tag[:6] == '__anon' and tag not in typerefs:
+                    tags = member_tags.split('::')
+                    for j in range(len(tags)):
+                        if not re.match('__anon', tags[j][:6]):
+                            break
+                        if '::'.join(tags[:j+1]) in typerefs:
+                            break
+                        if j == len(tags)-1:
                             goodmembers.append(x)
         return goodmembers
 
