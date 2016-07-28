@@ -19,10 +19,11 @@ class Tokenizer:
     K_PARAM = "a"
     K_VARIABLE = "v"
     K_MACRO = "d"
+    K_STRUCT = "s"
     K_MEMBER = "m"
     # todo: complete list...
 
-    declre = re.compile('(const\s)*(\w+)\s*([\s\*])\s*(\w+)(\[.*\])?')
+    declre = re.compile('(const\s)*(struct\s)*(\w+)\s*([\s\*])\s*(\w+)(\[.*\])?')
 
     def __init__(self, cachepath = "/tmp", cachesize = 500):
         self.cachesize = cachesize
@@ -103,6 +104,8 @@ class Tokenizer:
                 continue
             parsed=Tokenizer.parse_line(line, filename)
             name=parsed[Tokenizer.T_NAME]
+            if parsed[Tokenizer.T_KIND] == Tokenizer.K_STRUCT and 'struct' in parsed[Tokenizer.T_EXTRA]:
+                continue
             if parsed[Tokenizer.T_KIND] == Tokenizer.K_MEMBER and name.find("::") == -1:
                 continue
             if parsed[Tokenizer.T_KIND] == Tokenizer.K_MACRO and parsed[Tokenizer.T_SEARCH].find("#define") == -1:
@@ -191,14 +194,6 @@ class Tokenizer:
                 linenum = int(value)
             else:
                 exdict[name] = value
-        if type == Tokenizer.K_MEMBER:
-            while token.find("::__anon") != -1:
-                start=token.find("::__anon")
-                end=token.find("::", start+8)
-                if end != -1:
-                    token = token[0:start]+token[end:]
-                else:
-                    token = token[0:start]
         if type == Tokenizer.K_LOCAL or type == Tokenizer.K_VARIABLE:
             var = Tokenizer.parsevariable(search)
             if var:
@@ -230,7 +225,7 @@ class Tokenizer:
         decl=decl.strip()
         r = Tokenizer.declre.match(decl)
         if r:
-            return (r.group(4), r.group(2), r.group(3) == "*", r.group(5))
+            return (r.group(5), r.group(3), r.group(3) == "*", r.group(6))
 
     @staticmethod
     def pretty_type(line):
