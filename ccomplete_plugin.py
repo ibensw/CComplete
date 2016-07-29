@@ -137,10 +137,11 @@ class CCompletePlugin(sublime_plugin.EventListener):
         typerefs = set()
         for i,x in enumerate(members):
             if 'typeref' in x[Tokenizer.T_EXTRA]:
-                s = len('struct:'+base)
-                typeref_base = x[Tokenizer.T_EXTRA]['typeref'][:s]
-                typeref_tags = x[Tokenizer.T_EXTRA]['typeref'][s+2:]
-                if typeref_base == 'struct:'+base:
+                typeref = x[Tokenizer.T_EXTRA]['typeref']
+                l = 7 if typeref.startswith('struct:') else 6
+                typeref_base = typeref[l:l+len(base)]
+                typeref_tags = typeref[l+len(base)+2:]
+                if typeref_base == base:
                     typerefs.add(typeref_tags)
         for i,x in enumerate(members):
             last_match = x[Tokenizer.T_NAME].rfind('::')
