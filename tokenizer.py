@@ -20,6 +20,7 @@ class Tokenizer:
     K_VARIABLE = "v"
     K_MACRO = "d"
     K_STRUCT = "s"
+    K_UNION = "u"
     K_MEMBER = "m"
     # todo: complete list...
 
@@ -105,6 +106,8 @@ class Tokenizer:
             parsed=Tokenizer.parse_line(line, filename)
             name=parsed[Tokenizer.T_NAME]
             if parsed[Tokenizer.T_KIND] == Tokenizer.K_STRUCT and 'struct' in parsed[Tokenizer.T_EXTRA]:
+                continue
+            if parsed[Tokenizer.T_KIND] == Tokenizer.K_UNION and 'union' in parsed[Tokenizer.T_EXTRA]:
                 continue
             if parsed[Tokenizer.T_KIND] == Tokenizer.K_MEMBER and name.find("::") == -1:
                 continue

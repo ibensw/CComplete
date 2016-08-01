@@ -127,9 +127,15 @@ class CCompletePlugin(sublime_plugin.EventListener):
                 for key,value in self.cc.tokens.items():
                     if value[Tokenizer.T_KIND] == 'm' and 'typeref' in value[Tokenizer.T_EXTRA]:
                         typeref = value[Tokenizer.T_EXTRA]['typeref']
-                        res = [x for x in res if not re.match(typeref, 'struct:'+x[Tokenizer.T_NAME].lower())]
+                        res = [x for x in res if not re.match(typeref, 'struct:'+x[Tokenizer.T_NAME]) and not re.match(typeref, 'union:'+x[Tokenizer.T_NAME])]
                 if len(res) > 0:
-                    return res[0][Tokenizer.T_EXTRA]['typeref'][7:]
+                    ret_type = res[0][Tokenizer.T_EXTRA]['typeref']
+                    if ret_type.startswith('struct:'):
+                        return ret_type[7:]
+                    elif ret_type.startswith('union:'):
+                        return ret_type[6:]
+                    else:
+                        return ret_type
         return type
 
     def filter_members(self, members, base):
@@ -137,17 +143,18 @@ class CCompletePlugin(sublime_plugin.EventListener):
         typerefs = set()
         for i,x in enumerate(members):
             if 'typeref' in x[Tokenizer.T_EXTRA]:
-                s = len('struct:'+base)
-                typeref_base = x[Tokenizer.T_EXTRA]['typeref'][:s]
-                typeref_tags = x[Tokenizer.T_EXTRA]['typeref'][s+2:]
-                if typeref_base == 'struct:'+base:
+                typeref = x[Tokenizer.T_EXTRA]['typeref']
+                l = 7 if typeref.startswith('struct:') else 6
+                typeref_base = typeref[l:l+len(base)]
+                typeref_tags = typeref[l+len(base)+2:]
+                if typeref_base.lower() == base.lower():
                     typerefs.add(typeref_tags)
         for i,x in enumerate(members):
             last_match = x[Tokenizer.T_NAME].rfind('::')
             member_base = x[Tokenizer.T_NAME][:len(base)]
             member_tags = x[Tokenizer.T_NAME][len(base)+2:last_match]
             member_name = x[Tokenizer.T_NAME][last_match+2:]
-            if member_base == base:
+            if member_base.lower() == base.lower():
                 if member_tags == '':
                     goodmembers.append(x)
                 else:
