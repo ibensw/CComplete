@@ -127,9 +127,15 @@ class CCompletePlugin(sublime_plugin.EventListener):
                 for key,value in self.cc.tokens.items():
                     if value[Tokenizer.T_KIND] == 'm' and 'typeref' in value[Tokenizer.T_EXTRA]:
                         typeref = value[Tokenizer.T_EXTRA]['typeref']
-                        res = [x for x in res if not re.match(typeref, 'struct:'+x[Tokenizer.T_NAME].lower())]
+                        res = [x for x in res if not re.match(typeref, 'struct:'+x[Tokenizer.T_NAME]) and not re.match(typeref, 'union:'+x[Tokenizer.T_NAME])]
                 if len(res) > 0:
-                    return res[0][Tokenizer.T_EXTRA]['typeref'][7:]
+                    ret_type = res[0][Tokenizer.T_EXTRA]['typeref']
+                    if ret_type.startswith('struct:'):
+                        return ret_type[7:]
+                    elif ret_type.startswith('union:'):
+                        return ret_type[6:]
+                    else:
+                        return ret_type
         return type
 
     def filter_members(self, members, base):
