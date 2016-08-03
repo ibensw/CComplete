@@ -13,11 +13,10 @@ class CComplete:
     def add_tokens(self, tokens):
         for tokenname in tokens:
             token=tokens[tokenname]
-            lname = tokenname.lower()
-            if lname in self.tokens:
-                self.tokens[lname] = Tokenizer.best_match([self.tokens[lname], token])
+            if tokenname in self.tokens:
+                self.tokens[tokenname] = Tokenizer.best_match([self.tokens[tokenname], token])
             else:
-                self.tokens[lname] = token
+                self.tokens[tokenname] = token
 
     def is_valid(self, filename, basepaths = [], syspaths = [], extra_files=[]):
         files = self.I.scan_recursive(filename, basepaths, syspaths)
@@ -50,14 +49,13 @@ class CComplete:
             self.functiontokens[file] = functokens
         t=time.clock()-t
         print("Scanning for tokens took: %fs" % t)
-        self.sortedtokens = [x.lower() for x in self.tokens.keys()]
+        self.sortedtokens = [x for x in self.tokens.keys()]
         self.sortedtokens.sort()
         rem = self.T.clean_cache(set(self.files))
         print("Removed %d entries" % rem)
         print("Done loading, %d files" % len(self.files))
 
     def search_tokens(self, prefix):
-        prefix = prefix.lower()
         pos=bisect.bisect_left(self.sortedtokens, prefix)
         results=[]
         while pos < len(self.sortedtokens):

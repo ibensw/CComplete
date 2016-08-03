@@ -104,7 +104,6 @@ class CCompletePlugin(sublime_plugin.EventListener):
         return line.lstrip().split()[0]
 
     def get_base_type(self, type):
-        type = type.lower()
         if type in self.cc.tokens:
             token = self.cc.tokens[type]
             if token[Tokenizer.T_KIND] == "t" or token[Tokenizer.T_KIND] == "m":
@@ -147,14 +146,14 @@ class CCompletePlugin(sublime_plugin.EventListener):
                 l = 7 if typeref.startswith('struct:') else 6
                 typeref_base = typeref[l:l+len(base)]
                 typeref_tags = typeref[l+len(base)+2:]
-                if typeref_base.lower() == base.lower():
+                if typeref_base == base:
                     typerefs.add(typeref_tags)
         for i,x in enumerate(members):
             last_match = x[Tokenizer.T_NAME].rfind('::')
             member_base = x[Tokenizer.T_NAME][:len(base)]
             member_tags = x[Tokenizer.T_NAME][len(base)+2:last_match]
             member_name = x[Tokenizer.T_NAME][last_match+2:]
-            if member_base.lower() == base.lower():
+            if member_base == base:
                 if member_tags == '':
                     goodmembers.append(x)
                 else:
@@ -191,7 +190,7 @@ class CCompletePlugin(sublime_plugin.EventListener):
         if len(tokens) > 0:
             token = tokens[0]
         else:
-            token = self.cc.tokens[chain[0].lower()]
+            token = self.cc.tokens[chain[0]]
             if not token or token[Tokenizer.T_KIND] != Tokenizer.K_VARIABLE:
                 return []
         type=""
@@ -234,8 +233,8 @@ class CCompletePlugin(sublime_plugin.EventListener):
             tokens = [x for x in self.cc.functiontokens[filename][func] if x[Tokenizer.T_NAME] == word]
             if len(tokens) > 0:
                 return (word, Tokenizer.best_match(tokens))
-        if word.lower() in self.cc.tokens:
-            return (word, self.cc.tokens[word.lower()])
+        if word in self.cc.tokens:
+            return (word, self.cc.tokens[word])
         return (word, None)
 
     def on_activated_async(self, view):
