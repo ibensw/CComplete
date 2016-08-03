@@ -80,7 +80,7 @@ class Tokenizer:
                 _, values = self.cache[filename]
                 return values
 
-        hashfn = self.cachepath + "/" + str(hash(filename))+".ccache"
+        hashfn = self.cachepath + "/" + str(hash(filename)) + ".ccache"
         time = os.path.getmtime(filename)
 
         if os.path.isfile(hashfn) and os.path.getmtime(hashfn) > os.path.getmtime(filename):
@@ -221,6 +221,14 @@ class Tokenizer:
                 exdict["shortsignature"] = "(" + ", ".join(newargs) + ")"
         else:
             search = linecache.getline(filename, linenum)
+        hashr = "__anon" + str(hash(filename)) + "_"
+        token = token.replace("__anon", hashr)
+        if 'struct' in exdict:
+            exdict['struct'] = exdict['struct'].replace("__anon", hashr)
+        if 'union' in exdict:
+            exdict['union'] = exdict['union'].replace("__anon", hashr)
+        if 'typeref' in exdict:
+            exdict['typeref'] = exdict['typeref'].replace("__anon", hashr)
         return (token, filename, search, linenum, type, exdict)
 
     @staticmethod
