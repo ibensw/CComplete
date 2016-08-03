@@ -309,7 +309,10 @@ class Tokenizer:
         if token[Tokenizer.T_KIND] == "m":
             if "typeref" in token[Tokenizer.T_EXTRA]:
                 token[Tokenizer.T_EXTRA]["status"]="Member: " + token[Tokenizer.T_EXTRA]["typeref"] + " $#"
-                token[Tokenizer.T_EXTRA]["completion"]=[token[Tokenizer.T_NAME].split("::")[-1]+"\t" + token[Tokenizer.T_EXTRA]["typeref"], token[Tokenizer.T_NAME].split("::")[-1]]
+                cleantyperef = token[Tokenizer.T_EXTRA]["typeref"].split(":")[-1]
+                if cleantyperef[0:6] == '__anon':
+                    cleantyperef = "(Anonymous)"
+                token[Tokenizer.T_EXTRA]["completion"]=[token[Tokenizer.T_NAME].split("::")[-1]+"\t" + cleantyperef, token[Tokenizer.T_NAME].split("::")[-1]]
             else:
                 token[Tokenizer.T_EXTRA]["status"]="Member: " + Tokenizer.pretty_type(token[Tokenizer.T_SEARCH]) + " $#"
                 token[Tokenizer.T_EXTRA]["completion"]=[token[Tokenizer.T_NAME].split("::")[-1]+"\t" + Tokenizer.pretty_type(token[Tokenizer.T_SEARCH]), token[Tokenizer.T_NAME].split("::")[-1]]
