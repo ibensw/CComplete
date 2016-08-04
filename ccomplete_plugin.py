@@ -198,6 +198,8 @@ class CCompletePlugin(sublime_plugin.EventListener):
             type = token[Tokenizer.T_EXTRA]['typeref']
             if type[0:7] == "struct:":
                 type=type[7:]
+            elif type[0:6] == "union:":
+                type=type[6:]
         else:
             type = Tokenizer.parsevariable(token[Tokenizer.T_SEARCH])[1]
         type = self.get_base_type(type)
