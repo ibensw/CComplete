@@ -24,7 +24,7 @@ class Tokenizer:
     K_MEMBER = "m"
     # todo: complete list...
 
-    declre = re.compile('(const\s)*(struct\s)*(\w+)\s*([\s\*])\s*(\w+)(\[.*\])?')
+    declre = re.compile('(const\s)*(struct\s|union\s)*(\w+)\s*([\s\*])\s*(\w+)(\[.*\])?')
 
     def __init__(self, cachepath = "/tmp", cachesize = 500):
         self.cachesize = cachesize
