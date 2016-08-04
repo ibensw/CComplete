@@ -560,10 +560,10 @@ int main(int argc, char const *argv[])
      * Please do not change unless required for an automated regression.
      */
 
-     // Automated tests below
-     /* TEST_name1 */ name1.
-     /* TEST_name2 */ name2.
-     /* TEST_mystruct */ mystruct.
+    // Automated tests below
+    /* TEST_name1 */ name1.
+    /* TEST_name2 */ name2.
+    /* TEST_mystruct */ mystruct.
 
     return 0;
 }
