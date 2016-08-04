@@ -563,6 +563,10 @@ int main(int argc, char const *argv[])
     // Automated tests below
     /* TEST_name1 */ name1.
     /* TEST_name2 */ name2.
+    /* TEST_root_struct_a */ a_s_var.
+    /* TEST_root_struct_b */ b_s_var.
+    /* TEST_root_struct_c */ c_s_var.
+    /* TEST_root_struct_d */ d_s_var.
     /* TEST_mystruct */ mystruct.
 
     return 0;
