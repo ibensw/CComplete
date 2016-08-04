@@ -36,4 +36,6 @@ class CCompleteTest(sublime_plugin.ApplicationCommand):
 
     def run(self):
         print("Running automated tests...")
+        self.perform_single_test("name1", [['fgh1\tint', 'fgh1'], ['abc1\tint', 'abc1'], ['def1\tint', 'def1']])
+        self.perform_single_test("name2", [['fgh2\tint', 'fgh2'], ['abc2\tint', 'abc2'], ['def2\tint', 'def2']])
         self.perform_single_test("mystruct", [['mem37\tint', 'mem37'], ['internA\t(Anonymous)', 'internA'], ['internB\ti17', 'internB'], ['mem36\tint', 'mem36'], ['mem40\ti16', 'mem40'], ['mem2\tint', 'mem2'], ['internA\t(Anonymous)', 'internA'], ['internB\ti2', 'internB'], ['mem1\tint', 'mem1'], ['mem5\ti1', 'mem5'], ['a1\ttA', 'a1'], ['a2\tuA', 'a2'], ['b1\ttB', 'b1'], ['b2\tuB', 'b2'], ['c1\trootStructC', 'c1'], ['c2\trootUnionC', 'c2'], ['member\tint', 'member'], ['member1\t(Anonymous)', 'member1'], ['member2\tisa', 'member2'], ['member3\tisb', 'member3'], ['member4\t(Anonymous)', 'member4'], ['member5\tiua', 'member5'], ['member6\tiub', 'member6']])
