@@ -10,9 +10,6 @@ class CCompletePlugin(sublime_plugin.EventListener):
         global CCP
         if CCP is None:
             CCP = self
-        else:
-            print("ERROR")
-            return
         self.ready = False
         self.init = False
         self.prevword = None
