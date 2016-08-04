@@ -567,6 +567,10 @@ int main(int argc, char const *argv[])
     /* TEST_root_struct_b */ b_s_var.
     /* TEST_root_struct_c */ c_s_var.
     /* TEST_root_struct_d */ d_s_var.
+    /* TEST_root_union_a */ a_u_var.
+    /* TEST_root_union_b */ b_u_var.
+    /* TEST_root_union_c */ c_u_var.
+    /* TEST_root_union_d */ d_u_var.
     /* TEST_mystruct */ mystruct.
 
     return 0;

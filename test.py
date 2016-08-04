@@ -42,4 +42,8 @@ class CCompleteTest(sublime_plugin.ApplicationCommand):
         self.perform_single_test("root_struct_b", [['b1\tint', 'b1'], ['b2\tint', 'b2']])
         self.perform_single_test("root_struct_c", [['c1\tint', 'c1'], ['c2\tint', 'c2']])
         self.perform_single_test("root_struct_d", [['d1\tint', 'd1'], ['d2\tint', 'd2']])
+        self.perform_single_test("root_union_a", [['a1\tint', 'a1'], ['a2\tint', 'a2']])
+        self.perform_single_test("root_union_b", [['b1\tint', 'b1'], ['b2\tint', 'b2']])
+        self.perform_single_test("root_union_c", [['c1\tint', 'c1'], ['c2\tint', 'c2']])
+        self.perform_single_test("root_union_d", [['d1\tint', 'd1'], ['d2\tint', 'd2']])
         self.perform_single_test("mystruct", [['mem37\tint', 'mem37'], ['internA\t(Anonymous)', 'internA'], ['internB\ti17', 'internB'], ['mem36\tint', 'mem36'], ['mem40\ti16', 'mem40'], ['mem2\tint', 'mem2'], ['internA\t(Anonymous)', 'internA'], ['internB\ti2', 'internB'], ['mem1\tint', 'mem1'], ['mem5\ti1', 'mem5'], ['a1\ttA', 'a1'], ['a2\tuA', 'a2'], ['b1\ttB', 'b1'], ['b2\tuB', 'b2'], ['c1\trootStructC', 'c1'], ['c2\trootUnionC', 'c2'], ['member\tint', 'member'], ['member1\t(Anonymous)', 'member1'], ['member2\tisa', 'member2'], ['member3\tisb', 'member3'], ['member4\t(Anonymous)', 'member4'], ['member5\tiua', 'member5'], ['member6\tiub', 'member6']])
