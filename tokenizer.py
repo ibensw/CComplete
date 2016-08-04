@@ -105,9 +105,8 @@ class Tokenizer:
                 continue
             parsed=Tokenizer.parse_line(line, filename)
             name=parsed[Tokenizer.T_NAME]
-            if parsed[Tokenizer.T_KIND] == Tokenizer.K_STRUCT and 'struct' in parsed[Tokenizer.T_EXTRA]:
-                continue
-            if parsed[Tokenizer.T_KIND] == Tokenizer.K_UNION and 'union' in parsed[Tokenizer.T_EXTRA]:
+            if (parsed[Tokenizer.T_KIND] == Tokenizer.K_STRUCT or parsed[Tokenizer.T_KIND] == Tokenizer.K_UNION) \
+                and ('struct' in parsed[Tokenizer.T_EXTRA] or 'union' in parsed[Tokenizer.T_EXTRA]):
                 continue
             if parsed[Tokenizer.T_KIND] == Tokenizer.K_MEMBER and name.find("::") == -1:
                 continue
