@@ -18,7 +18,6 @@ class CCompleteTest(sublime_plugin.ApplicationCommand):
         self.setup()
         testline = self.testview.find("/* TEST_%s */" % testname, 0, sublime.LITERAL)
         testline = self.testview.line(testline)
-        print(testline)
         self.testview.sel().clear()
         self.testview.sel().add(sublime.Region(testline.b, testline.b))
         output=self.plugin.on_query_completions(self.testview, "", [testline.b])

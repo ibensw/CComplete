@@ -1,5 +1,6 @@
 from subprocess import PIPE, Popen
 import os.path
+import os
 import copy
 import re
 import marshal
@@ -35,6 +36,19 @@ class Tokenizer:
         linecache.clearcache()
         self.cache = {}
         self.cacheentries = []
+        print("Cache cleared")
+
+    def clear_disk_cache(self):
+        count = 0
+        for f in os.listdir(self.cachepath):
+            filepath = os.path.join(self.cachepath, f)
+            if os.path.isfile(filepath) and f[-7:] == ".ccache":
+                try:
+                    os.remove(filepath)
+                    count+=1
+                except:
+                    print("Error while removing %s: %s" % (filepath, sys.exc_info()[0]))
+        print("Removed %d files from disk" % count)
 
     def cache_size(self):
         return len(self.cacheentries)
@@ -240,7 +254,6 @@ class Tokenizer:
     @staticmethod
     def pretty_type(line):
         if line[0:2] == "/^" and line[-2:] == "$/":
-            print("OBSOLETE")
             line = line[2:-2]
         type = Tokenizer.parsevariable(line)
         if not type:

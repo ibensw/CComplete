@@ -13,9 +13,23 @@ class CCompletePlugin(sublime_plugin.EventListener):
         self.ready = False
         self.init = False
         self.prevword = None
+        self.printDebug = False
+
+    def set_debug(self, state):
+        if state == 0:
+            self.printDebug = False
+        elif state == 1:
+            self.printDebug = True
+        else:
+            self.printDebug = not self.printDebug
+        return self.printDebug
+
+    def debug(self, s):
+        if self.printDebug:
+            print(s)
 
     def plugin_loaded(self):
-        print("Plugin loaded!")
+        self.debug("Plugin loaded!")
         self.settings = sublime.load_settings("ccomplete")
         cachepath = sublime.cache_path() + "/ccomplete_cache"
         if not os.path.exists(cachepath):
@@ -59,10 +73,10 @@ class CCompletePlugin(sublime_plugin.EventListener):
 
         basepaths, syspaths = self.getProjectPaths(filename)
         if self.currentfile == filename and self.cc.is_valid(filename, basepaths, syspaths, extra):
-            print("Valid")
+            self.debug("Valid")
             self.ready = True
             return
-        print("Loading")
+        self.debug("Loading")
         view.set_status("ctcomplete", "Loading completions...")
         self.cc.load_file(filename, basepaths, syspaths, extra, lambda a, b: CCompletePlugin.showprogress(view, a, b))
         view.erase_status("ctcomplete")
@@ -77,9 +91,9 @@ class CCompletePlugin(sublime_plugin.EventListener):
         folders = []
         projectfolder = os.path.dirname(sublime.active_window().project_file_name())
         data = sublime.active_window().project_data()
-        print(data)
+        self.debug(data)
         if "folders" not in data:
-            print("No folder in projectdata")
+            self.debug("No folder in projectdata")
             return (folders, [])
         for folder in data["folders"]:
             path = os.path.join(projectfolder, folder["path"])
@@ -173,14 +187,14 @@ class CCompletePlugin(sublime_plugin.EventListener):
         while oldline != line:
             oldline = line
             line = re.sub(r'\[[^\[]*\]', '', line)
-            print(line)
+            self.debug(line)
         line = re.split(',|&|;|!|\+|\(|\[|\s+', line.strip())[-1].strip()
-        print(line)
+        self.debug(line)
         chain = [x.split("[", 1)[0] for x in re.split('->|\.|::', line.strip())]
-        print(chain)
+        self.debug(chain)
         func = self.current_function(view)
         if not filename in self.cc.functiontokens or not func in self.cc.functiontokens[filename]:
-            print("Not in a filled function (%s, %s)" % (filename, func))
+            self.debug("Not in a filled function (%s, %s)" % (filename, func))
             return []
         tokens = [x for x in self.cc.functiontokens[filename][func] if x[Tokenizer.T_NAME] == chain[0]]
         token = None
@@ -191,7 +205,7 @@ class CCompletePlugin(sublime_plugin.EventListener):
             if not token or token[Tokenizer.T_KIND] != Tokenizer.K_VARIABLE:
                 return []
         type=""
-        print(token)
+        self.debug(token)
         if token[Tokenizer.T_KIND] == Tokenizer.K_PARAM:
             type = token[Tokenizer.T_EXTRA]["type"]
         elif 'typeref' in token[Tokenizer.T_EXTRA]:
@@ -344,3 +358,21 @@ class ccomplete_show_symbols(sublime_plugin.TextCommand):
 
         tokenlist = [[x[Tokenizer.T_NAME], x[Tokenizer.T_FILENAME] + ":" + str(x[Tokenizer.T_LINE])] for x in tokens]
         sublime.active_window().show_quick_panel(tokenlist, on_done, 0, 0)
+
+class ccomplete_clear_disk_cache(sublime_plugin.ApplicationCommand):
+    def run(self):
+        global CCP
+        CCP.cc.T.clear_disk_cache()
+
+class ccomplete_clear_mem_cache(sublime_plugin.ApplicationCommand):
+    def run(self):
+        global CCP
+        CCP.cc.T.clear_cache()
+        print("Memory cache cleared")
+
+class ccomplete_set_debug(sublime_plugin.ApplicationCommand):
+    def run(self, state):
+        global CCP
+        # state: 0=off, 1=on, 2=toggle
+        newstate = CCP.set_debug(state)
+        print("New debug state = %d" % newstate)

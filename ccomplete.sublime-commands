@@ -1,0 +1,21 @@
+[
+    {
+        "caption": "CComplete: Run regression",
+        "command": "c_complete_test"
+    },
+    {
+        "caption": "CComplete: Toggle debug output",
+        "command": "ccomplete_set_debug",
+        "args": {
+            "state": 2
+        }
+    },
+    {
+        "caption": "CComplete: Clear disk cache",
+        "command": "ccomplete_clear_disk_cache"
+    },
+    {
+        "caption": "CComplete: Clear memory cache",
+        "command": "ccomplete_clear_mem_cache"
+    },
+]
