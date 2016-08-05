@@ -249,7 +249,7 @@ class Tokenizer:
         decl=decl.strip()
         r = Tokenizer.declre.match(decl)
         if r:
-            return (r.group(5), r.group(3), r.group(3) == "*", r.group(6))
+            return (r.group(5), r.group(3), r.group(4) == "*", r.group(6))
 
     @staticmethod
     def pretty_type(line):
