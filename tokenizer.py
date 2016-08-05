@@ -210,13 +210,6 @@ class Tokenizer:
                 linenum = int(value)
             else:
                 exdict[name] = value
-        if type == Tokenizer.K_LOCAL or type == Tokenizer.K_VARIABLE:
-            var = Tokenizer.parsevariable(search)
-            if var:
-                exdict["type"] = var[1]
-                exdict["pointer"] = var[2]
-                if var[3]:
-                    exdict["array"] = var[3]
         if search[0:2] == "/^" and search[-2:] == "$/":
             search = search[2:-2]
         elif search[0:2] == "/^" and search[-2:] == "(/":
@@ -234,6 +227,13 @@ class Tokenizer:
                 exdict["shortsignature"] = "(" + ", ".join(newargs) + ")"
         else:
             search = linecache.getline(filename, linenum)
+        if type == Tokenizer.K_LOCAL or type == Tokenizer.K_VARIABLE:
+            var = Tokenizer.parsevariable(search)
+            if var:
+                exdict["type"] = var[1]
+                exdict["pointer"] = var[2]
+                if var[3]:
+                    exdict["array"] = var[3]
         hashr = "__anon" + str(hash(filename)) + "_"
         token = token.replace("__anon", hashr)
         if 'struct' in exdict:

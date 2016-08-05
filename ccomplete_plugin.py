@@ -127,6 +127,8 @@ class CCompletePlugin(sublime_plugin.EventListener):
                     return self.get_base_type(ref)
                 else:
                     ref = CCompletePlugin.get_type(token[Tokenizer.T_SEARCH])
+                    if ref[-1] == "*":
+                        ref=ref[:-1]
                     return self.get_base_type(ref)
         else:
             pos = type.rfind('::')
@@ -205,7 +207,7 @@ class CCompletePlugin(sublime_plugin.EventListener):
             if not token or token[Tokenizer.T_KIND] != Tokenizer.K_VARIABLE:
                 return []
         type=""
-        self.debug(token)
+        self.debug("Token: %s" % str(token))
         if token[Tokenizer.T_KIND] == Tokenizer.K_PARAM:
             type = token[Tokenizer.T_EXTRA]["type"]
         elif 'typeref' in token[Tokenizer.T_EXTRA]:
@@ -217,12 +219,14 @@ class CCompletePlugin(sublime_plugin.EventListener):
         else:
             type = Tokenizer.parsevariable(token[Tokenizer.T_SEARCH])[1]
         type = self.get_base_type(type)
+        self.debug("type: %s" % str(type))
         pchain = chain[1:]
         if not full:
             pchain = pchain[0:-1]
         for newtype in pchain:
             type = type + "::" + newtype
             type = self.get_base_type(type)
+            self.debug("type: %s" % str(type))
         members = self.cc.search_tokens(type + "::")
         goodmembers = self.filter_members(members,type)
         return goodmembers
