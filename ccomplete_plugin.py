@@ -180,7 +180,7 @@ class CCompletePlugin(sublime_plugin.EventListener):
                             goodmembers.append(x)
         return goodmembers
 
-    def traverse_members(self, view, pos, full = False):
+    def traverse_members(self, view, pos, symbol="", full = False):
         filename = self.currentfile
         line = view.line(pos)
         line.b=pos
@@ -208,6 +208,11 @@ class CCompletePlugin(sublime_plugin.EventListener):
                 return []
         type=""
         self.debug("Token: %s" % str(token))
+        if symbol != "":
+            if symbol == "->" and not token[Tokenizer.T_EXTRA].get("pointer", False):
+                return []
+            if symbol == "." and token[Tokenizer.T_EXTRA].get("pointer", False):
+                return []
         if token[Tokenizer.T_KIND] == Tokenizer.K_PARAM:
             type = token[Tokenizer.T_EXTRA]["type"]
         elif 'typeref' in token[Tokenizer.T_EXTRA]:
@@ -238,7 +243,14 @@ class CCompletePlugin(sublime_plugin.EventListener):
         i = selword.begin()
         word = view.substr(selword)
         if i>2 and (view.substr(sublime.Region(i-2, i)) == "->" or view.substr(sublime.Region(i-1, i)) == "." or view.substr(sublime.Region(i-2, i)) == "::"):
-            members = self.traverse_members(view, selword.end())
+            symbol = ""
+            if view.substr(sublime.Region(i-2, i)) == "->":
+                symbol = "->"
+            elif view.substr(sublime.Region(i-1, i)) == ".":
+                symbol = "."
+            elif view.substr(sublime.Region(i-2, i)) == "::":
+                symbol = "::"
+            members = self.traverse_members(view, selword.end(), symbol)
             for m in members:
                 if m[Tokenizer.T_NAME].endswith("::" + word):
                     return (word, m)
@@ -266,7 +278,14 @@ class CCompletePlugin(sublime_plugin.EventListener):
 
         i=locations[0]-len(search)
         if i>2 and (view.substr(sublime.Region(i-2, i)) == "->" or view.substr(sublime.Region(i-1, i)) == "." or view.substr(sublime.Region(i-2, i)) == "::"):
-            members = self.traverse_members(view, locations[0])
+            symbol = ""
+            if view.substr(sublime.Region(i-2, i)) == "->":
+                symbol = "->"
+            elif view.substr(sublime.Region(i-1, i)) == ".":
+                symbol = "."
+            elif view.substr(sublime.Region(i-2, i)) == "::":
+                symbol = "::"
+            members = self.traverse_members(view, locations[0], symbol)
             completions = [i[Tokenizer.T_EXTRA]["completion"] for i in members]
             return (completions, sublime.INHIBIT_WORD_COMPLETIONS)
 
