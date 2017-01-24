@@ -207,12 +207,7 @@ class CCompletePlugin(sublime_plugin.EventListener):
             if not token or token[Tokenizer.T_KIND] != Tokenizer.K_VARIABLE:
                 return []
         type=""
-        self.debug("Token: %s" % str(token))
-        if symbol != "":
-            if symbol == "->" and not token[Tokenizer.T_EXTRA].get("pointer", False):
-                return []
-            if symbol == "." and token[Tokenizer.T_EXTRA].get("pointer", False):
-                return []
+        self.debug("Base token: %s" % str(token))
         if token[Tokenizer.T_KIND] == Tokenizer.K_PARAM:
             type = token[Tokenizer.T_EXTRA]["type"]
         elif 'typeref' in token[Tokenizer.T_EXTRA]:
@@ -224,14 +219,25 @@ class CCompletePlugin(sublime_plugin.EventListener):
         else:
             type = Tokenizer.parsevariable(token[Tokenizer.T_SEARCH])[1]
         type = self.get_base_type(type)
-        self.debug("type: %s" % str(type))
+        self.debug("Base type: %s" % str(type))
         pchain = chain[1:]
         if not full:
             pchain = pchain[0:-1]
-        for newtype in pchain:
+        for i,newtype in enumerate(pchain):
             type = type + "::" + newtype
+            if i == len(pchain)-1:
+                tokens = self.cc.search_tokens(type)
+                token = tokens[0]
+                self.debug("Final token: %s" % str(token))
             type = self.get_base_type(type)
-            self.debug("type: %s" % str(type))
+            self.debug("Final type: %s" % str(type))
+        if symbol != "":
+            if symbol == "->" and not token[Tokenizer.T_EXTRA].get("pointer", False):
+                self.debug("Pointer dereference on non pointer variable")
+                return []
+            if symbol == "." and token[Tokenizer.T_EXTRA].get("pointer", False):
+                self.debug("Regular dereference on pointer variable")
+                return []
         members = self.cc.search_tokens(type + "::")
         goodmembers = self.filter_members(members,type)
         return goodmembers
